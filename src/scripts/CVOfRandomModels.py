@@ -15,7 +15,7 @@ class SimpleFFNN(th.nn.Module):
         self.fc3 = th.nn.Linear(hidden_size, output_size)
     def forward(self, x):
         x = th.relu(self.fc1(x))
-        x = th.relu(self.fc2(x))
+        x = th.sigmoid(self.fc2(x))
         x = th.sigmoid(self.fc3(x))
         return x
 # Function that returns empirical risk on data X,Y passed into it for a given model
@@ -99,7 +99,7 @@ def cross_validate(model, X, Y, loss_fn, k, seed=0):
 
 def create_and_train_model(X, Y, model, seed=42):
     loss_fn = th.nn.BCELoss()
-    trained_model, avgValErrs, avgTrainErrs = cross_validate(model, X, Y, loss_fn, k=N_train, seed=seed)
+    trained_model, avgValErrs, avgTrainErrs = cross_validate(model, X, Y, loss_fn, k=5, seed=seed)
     return trained_model, avgValErrs, avgTrainErrs
 
 def randomSeedSequence(numSeeds, rngSeed =42):
@@ -142,43 +142,38 @@ file_exists = os.path.exists(csv_path)
 f = open(csv_path, "a", newline="")
 writer = csv.writer(f)
 if not file_exists:
-    writer.writerow(["rngSeed", "seed", "train_acc", "val_acc", "test_acc"])
+    writer.writerow(["rngSeed", "seed", "train_error", "val_error", "test_error"])
     f.flush()
     os.fsync(f.fileno())
 
 trainErrs, valErrs, testErrs = [], [], []
 buffer = []
 
-print(f"Started program {rngSeed}. Checking {numSeeds} seeds...")
-bestModel = None
-bestValAcc = 0
-bestTrainAcc = 0
+print(f"Started program{rngSeed}, numSeeds={numSeeds}...")
+
 for i, seed in enumerate(seeds, start=1):
     model = SimpleFFNN(input_size=d, hidden_size=hidden_size, output_size=2)
     trainedModel, avgCVValErr, avgCVTrainErr = create_and_train_model(
         X_train, Y_train, model, seed=seed
     )
-    if 1-avgCVTrainErr > bestValAcc:
-        bestValAcc = 1- avgCVValErr
-        bestTrainAcc = 1- avgCVTrainErr
-        bestModel = trainedModel
-    else:
-        pass
-    # flush every flushEvery or at the end
-    # test error on same device as model
-device = next(bestModel.parameters()).device
-testErr = error_rate(bestModel, X_test.to(device), Y_test.to(device))
 
-trainErrs.append(1-avgCVTrainErr)
-valErrs.append(1-avgCVValErr)
-testErrs.append(1-testErr)
-buffer.append([rngSeed, seed, bestTrainAcc, 1-avgCVValErr, 1-testErr])
-if (i % flushEvery == 0) or (i == numSeeds):
-    writer.writerows(buffer)
-    f.flush()
-    os.fsync(f.fileno())
-    buffer.clear()
-    print(f" Program {rngSeed} Flushed {i}/{numSeeds} rows to {csv_path}")
+    # test error on same device as model
+    device = next(trainedModel.parameters()).device
+    testErr = error_rate(trainedModel, X_test.to(device), Y_test.to(device))
+
+    trainErrs.append(avgCVTrainErr)
+    valErrs.append(avgCVValErr)
+    testErrs.append(testErr)
+
+    buffer.append([rngSeed, seed, avgCVTrainErr, avgCVValErr, testErr])
+
+    # flush every flushEvery or at the end
+    if (i % flushEvery == 0) or (i == numSeeds):
+        writer.writerows(buffer)
+        f.flush()
+        os.fsync(f.fileno())
+        buffer.clear()
+        print(f" Program {rngSeed} Flushed {i}/{numSeeds} rows to {csv_path}")
 
 f.close()
 print(f"Program {rngSeed} Completed. Saved results to {csv_path}")

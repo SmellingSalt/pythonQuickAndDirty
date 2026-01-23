@@ -9,6 +9,7 @@ do
     python src/scripts/run_experiment1.py \
         --numSeeds ${NUM_SEEDS} \
         --rngSeed ${RNGSEED} \
+        --hiddenSize 64 \
         --flushEvery 5 &
 done
 
