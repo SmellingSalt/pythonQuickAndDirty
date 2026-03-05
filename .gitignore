@@ -193,4 +193,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 results/
-src/data/
+src/data/MNIST/
