@@ -1,36 +1,22 @@
 ```mermaid
 %%{init: {'themeVariables': { 'fontSize': '22px' }}}%%
 timeline
-    title Research Methodology Workflow
+    title Research Methodology
 
-    section IDENTIFICATION AND SCREENING
     Search : Google Scholar search
-           : NAS + meta-overfitting + generalisation
-           : n = 44
+           : Generalisation, transfer, meta-overfitting, rank disorder
 
-    Screening : Title and abstract review
-              : Keep NAS or AutoML focused studies
-              : n = 19
+    Screening : Read title and abstract
+              : Keep papers relevant to NAS reliability
 
-    Relevance Check : Full-text screening
-                    : Retain only NAS-relevant meta-overfitting papers
-                    : n = n1
+    Expansion : Add papers from White et al. survey
+              : Add papers from citations
+              : Use Perplexity to find missed or recent papers
 
-    section Expansion
-    Expansion : Use White et al. (2023)
-              : Build method taxonomy
-              : Collect n2 papers per category
+    Classification : Group into Rank Disorder
+                   : Group into Meta-Overfitting Within Task
+                   : Group into Meta-Overfitting Across Task
 
-    Targeted Search : Category X search
-                    : Add n3 papers
-
-    Final Corpus : Total = n1 + n3
-
-    section Analysis and Classification
-    Analysis : Detailed reading
-             : Assess treatment of generalisation in NAS
-
-    Classification : Within-task vs across-task
-                   : Search strategy family
-                   : Reported in Table X
+    Analysis : Compare NAS families
+             : Extract cause and mitigation
 ```
