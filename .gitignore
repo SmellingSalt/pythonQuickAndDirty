@@ -194,3 +194,4 @@ cython_debug/
 .cursorindexingignore
 results/
 src/data/MNIST/
+nosync/
